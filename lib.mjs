@@ -39,11 +39,26 @@ export function getDailyVerse(dateISO){
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function trunc(s,n){s=s||'';return s.length<=n?s:s.slice(0,s.lastIndexOf(' ',n)>n*0.6?s.lastIndexOf(' ',n):n).trimEnd()+'…';}
 
+function wrap(text, maxChars, maxLines){
+  const words = (text||'').split(/\s+/);
+  const lines = []; let cur = '';
+  for (const w of words){
+    if ((cur ? cur+' '+w : w).length <= maxChars) cur = cur ? cur+' '+w : w;
+    else { if(cur) lines.push(cur); cur = w; if (lines.length === maxLines) break; }
+  }
+  if (cur && lines.length < maxLines) lines.push(cur);
+  const joined = lines.join(' ');
+  if (joined.length < (text||'').replace(/\s+/g,' ').length && lines.length) lines[lines.length-1] += '…';
+  return lines.slice(0, maxLines);
+}
+
 export async function renderBanner(verse, outPath){
-  const W=1080,H=540;
-  const arabic = trunc(verse.text, 60);
-  const meal = trunc(verse.meal, 95);
+  const W=1080, H=540;
   const ref = `${verse.surahName} ${verse.surahId}:${verse.ayahId} · Diyanet Meâli`;
+  const lines = wrap(verse.meal, 32, 3);              // Arapça yok — meal hero, 3 satıra kadar
+  const startY = lines.length >= 3 ? 220 : (lines.length === 2 ? 245 : 270);
+  const lineEls = lines.map((ln,i)=>`<text x="380" y="${startY + i*50}" fill="#F1E9FF" font-family="sans-serif" font-size="34" font-weight="600">${esc(ln)}</text>`).join('');
+  const refY = startY + lines.length*50 + 20;
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   <defs>
    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2D1B4E"/><stop offset="55%" stop-color="#1A0B2E"/><stop offset="100%" stop-color="#0D0518"/></linearGradient>
@@ -51,10 +66,9 @@ export async function renderBanner(verse, outPath){
   </defs>
   <rect width="${W}" height="${H}" fill="url(#g)"/><rect width="${W}" height="${H}" fill="url(#glow)"/>
   <rect x="0" y="0" width="${W}" height="6" fill="#A855F7" opacity="0.7"/>
-  <text x="380" y="140" fill="#C9A8FF" font-family="sans-serif" font-size="36" font-weight="800" letter-spacing="5">📖 GÜNÜN AYETİ</text>
-  <text x="380" y="245" fill="#ffffff" font-family="serif" font-size="52" font-weight="700" direction="rtl">${esc(arabic)}</text>
-  <text x="380" y="340" fill="#E6D9FF" font-family="sans-serif" font-size="30">"${esc(meal)}"</text>
-  <text x="380" y="395" fill="#9B7Fd0" font-family="sans-serif" font-size="26">${esc(ref)}</text>
+  <text x="380" y="135" fill="#C9A8FF" font-family="sans-serif" font-size="34" font-weight="800" letter-spacing="5">📖 GÜNÜN AYETİ</text>
+  ${lineEls}
+  <text x="380" y="${refY}" fill="#9B7Fd0" font-family="sans-serif" font-size="26">${esc(ref)}</text>
   </svg>`;
   const logo = await sharp(join(ROOT,'assets/logo.png')).resize(250,250).toBuffer();
   await sharp(Buffer.from(svg)).composite([{input:logo,left:70,top:145}]).png().toFile(outPath);

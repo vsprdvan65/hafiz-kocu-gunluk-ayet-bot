@@ -42,11 +42,10 @@ console.log('BANNER:', imageUrl || '(yüklenemedi, görselsiz gönderilecek)');
 
 initializeApp({ credential: cert(loadServiceAccount()) });
 
-// Banner'ı görmeyen cihazlarda (Xiaomi/MIUI görseli siler) da zengin görünüm:
-// Arapça ayet + tam meal, genişleyince (BigText) tamamı okunur.
-const arabicShort = (v.text||'').length>110 ? (v.text.slice(0,110)+'…') : (v.text||'');
+// Banner'ı görmeyen cihazlarda (Xiaomi/MIUI görseli siler) da dolu görünüm:
+// tam meal, genişleyince (BigText) tamamı okunur. (Arapça yok — sade)
 const mealFull = (v.meal||'').length>320 ? (v.meal.slice(0,320)+'…') : (v.meal||'');
-const body = `${arabicShort}\n\n${mealFull}\n\n— ${v.surahName} ${v.surahId}:${v.ayahId} · Diyanet Meâli`;
+const body = `${mealFull}\n\n— ${v.surahName} ${v.surahId}:${v.ayahId} · Diyanet Meâli`;
 const androidNotif = { color:'#A855F7', channelId:'gunun_ayeti', icon:'ic_stat_notify' };
 if (imageUrl) androidNotif.image = imageUrl;
 const notif = { title:'📖 Günün Ayeti', body };

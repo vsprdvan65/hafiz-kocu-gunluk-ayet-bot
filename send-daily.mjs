@@ -16,14 +16,28 @@ const date = process.env.FORCE_DATE || todayISO();
 const v = getDailyVerse(date);
 console.log('TARİH:', date, '| AYET:', `${v.surahName} ${v.surahId}:${v.ayahId}`);
 
-await renderBanner(v, '/tmp/banner_daily.png');
+// Banner'ı repo köküne üret
+const bannerPath = new URL('./banner.png', import.meta.url).pathname;
+await renderBanner(v, bannerPath);
 
-// Banner'ı geçici host'a yükle (catbox) — FCM image URL için
+// Hosting: CI'da repo'ya commit + GitHub raw (SHA pinli, taze) ; yerelde catbox
 let imageUrl = '';
-try {
-  imageUrl = execSync('curl -s -F"reqtype=fileupload" -F"fileToUpload=@/tmp/banner_daily.png" https://catbox.moe/user/api.php').toString().trim();
-  if (!imageUrl.startsWith('http')) imageUrl = '';
-} catch { imageUrl = ''; }
+if (process.env.GITHUB_ACTIONS) {
+  try {
+    execSync('git config user.name "ayet-bot"');
+    execSync('git config user.email "bot@users.noreply.github.com"');
+    execSync('git add banner.png');
+    execSync(`git commit -m "banner: ${date}" || true`, { shell: '/bin/bash', stdio: 'ignore' });
+    execSync('git push', { stdio: 'ignore' });
+    const sha = execSync('git rev-parse HEAD').toString().trim();
+    imageUrl = `https://raw.githubusercontent.com/${process.env.GITHUB_REPOSITORY}/${sha}/banner.png`;
+  } catch (e) { console.log('banner host hata:', e.message); imageUrl = ''; }
+} else {
+  try {
+    imageUrl = execSync(`curl -s -F"reqtype=fileupload" -F"fileToUpload=@${bannerPath}" https://catbox.moe/user/api.php`).toString().trim();
+    if (!imageUrl.startsWith('http')) imageUrl = '';
+  } catch { imageUrl = ''; }
+}
 console.log('BANNER:', imageUrl || '(yüklenemedi, görselsiz gönderilecek)');
 
 initializeApp({ credential: cert(loadServiceAccount()) });

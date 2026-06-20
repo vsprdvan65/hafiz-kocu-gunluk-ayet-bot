@@ -6,6 +6,9 @@ on:
     - cron: '0 8 * * *'
   workflow_dispatch: {}   # Manuel test için (Actions sekmesinden "Run workflow")
 
+permissions:
+  contents: write   # banner.png'i repo'ya commit edebilmek için
+
 jobs:
   send:
     runs-on: ubuntu-latest

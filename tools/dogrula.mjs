@@ -60,8 +60,8 @@ mealsiz.length === 0
 const sayfalar = flat.map(v => v.page);
 const enKucuk = Math.min(...sayfalar), enBuyuk = Math.max(...sayfalar);
 enKucuk === 0
-  ? ok(`sayfa 0-tabanlı (${enKucuk}..${enBuyuk}) → gösterimde ${enKucuk + 1}..${enBuyuk + 1}`)
-  : err(`sayfa ${enKucuk}'dan başlıyor; lib.mjs page+1 varsayıyor`);
+  ? ok(`sayfa 0-tabanlı (${enKucuk}..${enBuyuk}) — uygulamayla aynı, ham gösterilir`)
+  : err(`sayfa ${enKucuk}'dan başlıyor; uygulama 0-tabanlı ham değer bekliyor`);
 
 // ── 2. Veri özdeşliği ──────────────────────────────────────────────────────
 console.log('\n[2] Uygulama verisiyle özdeşlik');

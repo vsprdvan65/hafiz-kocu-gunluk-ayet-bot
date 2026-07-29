@@ -33,9 +33,10 @@ npm run dogrula         # bot ↔ app uyumunu 400 gün üzerinden denetler
 > (Uthmani imlâ, âyet sonu rakamı gömülü) **kaldırıldı**; Arapça metin artık
 > uygulamadakiyle aynı Diyanet imlâsında.
 
-`kuran.json`'da **`page` alanı 0-tabanlıdır** (Fâtiha = 0, Nâs = 604).
-`getDailyVerse` bunu `pageNumber: page + 1` ile 1-tabanlı fiziksel sayfaya
-çevirir; ham `page` değeri kullanıcıya gösterilmemelidir.
+`kuran.json`'da **`page` alanı 0-tabanlıdır** (Fâtiha = 0, Nâs = 604) ve
+uygulama bunu **bilinçli olarak ham gösterir** — mushaf sayfa seçicisi de aynı
+numarayı kullanır. `getDailyVerse` bu yüzden `page`'e dokunmaz; +1 eklenirse
+bildirim uygulamadan farklı sayfa söyler.
 
 ## Göndermeden önce kontrol
 

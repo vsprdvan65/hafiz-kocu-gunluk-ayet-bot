@@ -49,9 +49,10 @@ export function getDailyVerse(dateISO){
     meal: row?row[1]:'',
     surahName: _names[surahId] || `Sure ${surahId}`,
     juzNumber: v.juz_number,
-    // kuran.json'da `page` 0-TABANLIDIR (Fâtiha = 0, Nâs = 604).
-    // Kullanıcıya gösterilen fiziksel sayfa 1-tabanlı: page + 1.
-    pageNumber: v.page + 1,
+    // `page` 0-TABANLIDIR (Fâtiha = 0, Nâs = 604) ve uygulamada BİLİNÇLİ
+    // olarak ham gösterilir (mushaf sayfa seçicisi de aynı numarayı kullanır).
+    // Burada +1 eklenirse bildirim uygulamadan farklı sayfa söyler.
+    pageNumber: v.page,
   };
 }
 

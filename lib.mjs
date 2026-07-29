@@ -5,7 +5,12 @@ import sharp from 'sharp';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 
-// ── Uygulamayla BİREBİR aynı deterministik seçim (app: dailyVerse.js) ──
+// ── Uygulamayla BİREBİR aynı deterministik seçim ──
+// App karşılığı: Ana_uygulama/Pages/Home/HomePage.jsx → loadDailyVerse()
+// Veri kaynağı da aynı: data/kuran.json, uygulamanın public/kuran.json
+// dosyasının birebir kopyasıdır (tools/veri-guncelle.mjs ile tazelenir).
+// ESKİ YAPI (quran-metadata-ayah.json, Uthmani imlâ) KALDIRILDI — Arapça
+// metin uygulamadakiyle aynı Diyanet imlâsında olsun diye.
 function hashString(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 function mulberry32(seed){return function(){seed|=0;seed=(seed+0x6d2b79f5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296;};}
 
@@ -14,10 +19,13 @@ export function todayISO(){
   return new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Istanbul'});
 }
 
-let _ayah, _meal, _names;
+let _flat, _meal, _names;
 function load(){
-  if(_ayah) return;
-  _ayah = JSON.parse(readFileSync(join(ROOT,'data/quran-metadata-ayah.json'),'utf8'));
+  if(_flat) return;
+  // kuran.json: {surahs:[{id, verses:[{surah_id, verse_number, verse, page, juz_number}]}]}
+  const kuran = JSON.parse(readFileSync(join(ROOT,'data/kuran.json'),'utf8'));
+  _flat = [];
+  for(const s of kuran.surahs) for(const v of s.verses) _flat.push(v);
   _meal = JSON.parse(readFileSync(join(ROOT,'data/diyanet.json'),'utf8'));
   const src = readFileSync(join(ROOT,'data/turkishSurahNames.js'),'utf8');
   _names = {};
@@ -26,14 +34,25 @@ function load(){
 
 export function getDailyVerse(dateISO){
   load();
+  // RNG çağrı SIRASI uygulamayla aynı olmalı: önce sûre, sonra âyet.
   const rng = mulberry32(hashString(dateISO));
   const surahId = Math.floor(rng()*114)+1;
-  const verses = Object.values(_ayah).filter(v=>v.surah_number===surahId).sort((a,b)=>a.ayah_number-b.ayah_number);
+  // Âyet, sûrenin GERÇEK listesinden seçilir — numara hesaplanmaz.
+  const verses = _flat.filter(v=>v.surah_id===surahId).sort((a,b)=>a.verse_number-b.verse_number);
   const v = verses[Math.floor(rng()*verses.length)];
-  const ayahId = v.ayah_number;
+  const ayahId = v.verse_number;
   const sure = _meal.sures[surahId-1];
   const row = sure.ayetler.find(a=>String(a[0])===String(ayahId));
-  return { surahId, ayahId, text: v.text, meal: row?row[1]:'', surahName: _names[surahId] || `Sure ${surahId}` };
+  return {
+    surahId, ayahId,
+    text: v.verse,
+    meal: row?row[1]:'',
+    surahName: _names[surahId] || `Sure ${surahId}`,
+    juzNumber: v.juz_number,
+    // kuran.json'da `page` 0-TABANLIDIR (Fâtiha = 0, Nâs = 604).
+    // Kullanıcıya gösterilen fiziksel sayfa 1-tabanlı: page + 1.
+    pageNumber: v.page + 1,
+  };
 }
 
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}

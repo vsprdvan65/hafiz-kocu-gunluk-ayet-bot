@@ -10,6 +10,43 @@ aynı** olduğundan, bildirim ana sayfadaki "Günün Ayeti" kartıyla eşleşir.
 - `send-daily.mjs` — ayeti hesaplar, banner'ı catbox'a yükler, FCM topic `all`'a gönderir
 - `.github/workflows/daily.yml` — her gün 08:00 UTC (= 11:00 TR) çalışır
 
+## Veri — uygulamayla ortak kaynak
+
+Bot ile uygulama **aynı** âyeti göstermek zorunda. Bu ancak ikisi aynı veriyi
+okursa garanti edilir, o yüzden `data/` altındaki dosyalar uygulamanın
+dosyalarının **birebir kopyasıdır** — dönüştürülmez, elle düzenlenmez:
+
+| `data/` | Uygulamadaki kaynağı |
+|---|---|
+| `kuran.json` | `public/kuran.json` |
+| `diyanet.json` | `public/data/meal/diyanet.json` |
+| `turkishSurahNames.js` | `Ana_uygulama/Data/turkishSurahNames.js` |
+
+Uygulamanın verisi değiştiğinde:
+
+```bash
+npm run veri-guncelle   # uygulamadan kopyalar
+npm run dogrula         # bot ↔ app uyumunu 400 gün üzerinden denetler
+```
+
+> Sürüm 2.0 ile veri Diyanet altyapısına geçti. Eski `quran-metadata-ayah.json`
+> (Uthmani imlâ, âyet sonu rakamı gömülü) **kaldırıldı**; Arapça metin artık
+> uygulamadakiyle aynı Diyanet imlâsında.
+
+`kuran.json`'da **`page` alanı 0-tabanlıdır** (Fâtiha = 0, Nâs = 604).
+`getDailyVerse` bunu `pageNumber: page + 1` ile 1-tabanlı fiziksel sayfaya
+çevirir; ham `page` değeri kullanıcıya gösterilmemelidir.
+
+## Göndermeden önce kontrol
+
+Push geri alınamaz — içerik her zaman önce önizlenir:
+
+```bash
+npm run onizle       # bugün
+npm run onizle 7     # önümüzdeki 7 gün
+node tools/onizle.mjs 2026-08-01
+```
+
 ## Kurulum (tek seferlik)
 1. Bu klasörü bir **GitHub deposuna** yükle (private olabilir).
 2. Depo → **Settings → Secrets and variables → Actions → New repository secret**:

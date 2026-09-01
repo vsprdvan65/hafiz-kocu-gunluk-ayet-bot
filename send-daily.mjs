@@ -1,8 +1,21 @@
 import { todayISO, getDailyVerse, renderBanner } from './lib.mjs';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
+
+// GitHub Actions'ın `schedule` tetikleyicisi "en iyi çaba" prensibiyle
+// çalışır, saatler süren gecikmeler yaşanabiliyor (bkz. .github/workflows/
+// daily.yml — aynı gün içinde birden fazla saatte tekrar deneniyor). Bu
+// yüzden hangi deneme ilk gerçekten çalışırsa o göndersin, sonrakiler
+// "bugün zaten gönderildi" görüp FCM'e hiç dokunmadan çıksın diye basit
+// bir tarih işareti tutuluyor. Marker repo'ya commit'lenir (CI'da), böylece
+// aynı günün farklı run'ları arasında paylaşılan tek doğru kaynak olur.
+const MARKER_PATH = new URL('./last-sent.txt', import.meta.url).pathname;
+function alreadySentToday(date){
+  if (!existsSync(MARKER_PATH)) return false;
+  return readFileSync(MARKER_PATH, 'utf8').trim() === date;
+}
 
 // Servis hesabı: CI'da secret (env FIREBASE_SERVICE_ACCOUNT = JSON), yerelde dosya
 function loadServiceAccount(){
@@ -13,6 +26,12 @@ function loadServiceAccount(){
 }
 
 const date = process.env.FORCE_DATE || todayISO();
+
+if (!process.env.FORCE_DATE && alreadySentToday(date)) {
+  console.log(`ATLANDI: ${date} için bugün zaten gönderilmiş (last-sent.txt).`);
+  process.exit(0);
+}
+
 const v = getDailyVerse(date);
 console.log('TARİH:', date, '| AYET:', `${v.surahName} ${v.surahId}:${v.ayahId}`);
 
@@ -60,3 +79,14 @@ const msg = {
 
 const id = await getMessaging().send(msg);
 console.log('✅ GÖNDERİLDİ:', id);
+
+// Gönderim başarılıysa işaretle — aynı günün geç kalan/yedek tetiklemeleri
+// (workflow_dispatch yeniden deneme, `schedule` yedeği) bunu görüp atlar.
+writeFileSync(MARKER_PATH, date, 'utf8');
+if (process.env.GITHUB_ACTIONS) {
+  try {
+    execSync('git add last-sent.txt');
+    execSync(`git commit -m "sent: ${date}" || true`, { shell: '/bin/bash', stdio: 'ignore' });
+    execSync('git push', { stdio: 'ignore' });
+  } catch (e) { console.log('marker push hata:', e.message); }
+}

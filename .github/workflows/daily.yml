@@ -2,11 +2,21 @@ name: Günün Ayeti — Günlük Push
 
 on:
   schedule:
-    # 08:07 UTC = 11:07 Türkiye (UTC+3). GitHub cron UTC'dir.
-    # Bilinçli olarak tam saat başı DEĞİL (dakika=7): GitHub Actions'ta
-    # tam saat başları (0 8 * * * gibi) en yoğun kuyruk zamanı, bu yüzden
-    # saatlerce gecikebiliyor (2026-08-27/28'de 11-12 saat gecikme görüldü).
-    - cron: '7 8 * * *'
+    # GitHub Actions'ın `schedule` tetikleyicisi "en iyi çaba" (best-effort)
+    # prensibiyle çalışır — dakikayı tam saat başından kaydırmak (08:07 gibi)
+    # denendi ama İŞE YARAMADI: gerçek çalışma kayıtlarında 08-27'den
+    # 08-31'e kadar hedeften 5-12 saat gecikme görüldü (bkz. proje notu).
+    # Bu yapısal bir GitHub kısıtı, kod hatası değil. Çözüm: TEK bir cron
+    # yerine güne yayılmış 7 deneme (09:07-15:07 TR aralığı) — hangisi ilk
+    # gerçekten çalışırsa o gönderir, send-daily.mjs'teki last-sent.txt
+    # tabanlı tekrar-gönderim koruması sayesinde diğerleri sessizce atlanır.
+    - cron: '7 6 * * *'   # 09:07 TR
+    - cron: '7 7 * * *'   # 10:07 TR
+    - cron: '7 8 * * *'   # 11:07 TR (hedef saat)
+    - cron: '7 9 * * *'   # 12:07 TR
+    - cron: '7 10 * * *'  # 13:07 TR
+    - cron: '7 11 * * *'  # 14:07 TR
+    - cron: '7 12 * * *'  # 15:07 TR (son yedek deneme)
   workflow_dispatch: {}   # Manuel test için (Actions sekmesinden "Run workflow")
 
 permissions:

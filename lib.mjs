@@ -26,7 +26,11 @@ function load(){
   const kuran = JSON.parse(readFileSync(join(ROOT,'data/kuran.json'),'utf8'));
   _flat = [];
   for(const s of kuran.surahs) for(const v of s.verses) _flat.push(v);
-  _meal = JSON.parse(readFileSync(join(ROOT,'data/diyanet.json'),'utf8'));
+  // 2026-09-02: Diyanet meali telif durumu netleşene kadar bırakıldı; Elmalılı
+  // (1942 vefat, kamu malı) kullanılıyor. Uygulamadaki HomePage kartı da AYNI
+  // meali okur — ikisi ayrışırsa kullanıcı bildirimde başka, kartta başka
+  // metin görür.
+  _meal = JSON.parse(readFileSync(join(ROOT,'data/elmalili.json'),'utf8'));
   const src = readFileSync(join(ROOT,'data/turkishSurahNames.js'),'utf8');
   _names = {};
   for(const m of src.matchAll(/(\d+):\s*"([^"]+)"/g)) _names[+m[1]] = m[2];

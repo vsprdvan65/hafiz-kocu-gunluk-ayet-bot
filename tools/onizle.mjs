@@ -32,7 +32,7 @@ for (const d of gunler) {
   const v = getDailyVerse(d);
   // send-daily.mjs ile aynı gövde
   const mealFull = (v.meal || '').length > 320 ? v.meal.slice(0, 320) + '…' : (v.meal || '');
-  const body = `${mealFull}\n\n— ${v.surahName} ${v.surahId}:${v.ayahId} · Diyanet Meâli`;
+  const body = `${mealFull}\n\n— ${v.surahName} ${v.surahId}:${v.ayahId} · Elmalılı Meâli`;
 
   console.log('─'.repeat(72));
   console.log(`TARİH   : ${d}${d === todayISO() ? '  (bugün)' : ''}`);

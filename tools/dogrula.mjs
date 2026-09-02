@@ -31,7 +31,7 @@ const err = (m) => { console.log(`  ✗ ${m}`); hata++; };
 // ── 1. Veri bütünlüğü ──────────────────────────────────────────────────────
 console.log('\n[1] Veri bütünlüğü');
 const kuran = JSON.parse(readFileSync(join(ROOT, 'data/kuran.json'), 'utf8'));
-const meal  = JSON.parse(readFileSync(join(ROOT, 'data/diyanet.json'), 'utf8'));
+const meal  = JSON.parse(readFileSync(join(ROOT, 'data/elmalili.json'), 'utf8'));
 
 kuran.surahs.length === 114 ? ok('114 sûre') : err(`sûre sayısı ${kuran.surahs.length}, 114 olmalı`);
 
@@ -70,7 +70,7 @@ if (!existsSync(app)) {
 } else {
   const ciftler = [
     ['data/kuran.json',            'public/kuran.json'],
-    ['data/diyanet.json',          'public/data/meal/diyanet.json'],
+    ['data/elmalili.json',         'public/data/meal/elmalili.json'],
     ['data/turkishSurahNames.js',  'Ana_uygulama/Data/turkishSurahNames.js'],
   ];
   for (const [b, a] of ciftler) {

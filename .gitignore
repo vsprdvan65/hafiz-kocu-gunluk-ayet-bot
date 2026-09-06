@@ -2,3 +2,6 @@ node_modules/
 serviceAccountKey.json
 *.log
 /tmp/
+
+# tools/onizle.mjs BANNER=1 ile üretilen geçici önizleme
+onizleme-banner.png

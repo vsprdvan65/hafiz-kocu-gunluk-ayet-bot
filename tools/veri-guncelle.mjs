@@ -10,20 +10,20 @@
  *   node tools/veri-guncelle.mjs [uygulama-klasoru]
  *
  * Örn:
- *   node tools/veri-guncelle.mjs ../HAFIZ_KOCU_2_SÜRÜMLERİ/hafiz-kocu-2.0.2
+ *   node tools/veri-guncelle.mjs ../HAFIZ_KOCU_3_SURUMLERI/hafiz-kocu-3.0.0
  */
 import { copyFileSync, existsSync, statSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join, resolve } from 'path';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const VARSAYILAN_APP = resolve(ROOT, '../HAFIZ_KOCU_2_SÜRÜMLERİ/hafiz-kocu-2.0.37');
+const VARSAYILAN_APP = resolve(ROOT, '../HAFIZ_KOCU_3_SURUMLERI/hafiz-kocu-3.0.0');
 const app = resolve(process.argv[2] || VARSAYILAN_APP);
 
 const DOSYALAR = [
   ['public/kuran.json',                 'data/kuran.json'],
   ['public/data/meal/elmalili.json',    'data/elmalili.json'],
-  ['Ana_uygulama/Data/turkishSurahNames.js', 'data/turkishSurahNames.js'],
+  ['src/data/quran/turkishSurahNames.js', 'data/turkishSurahNames.js'],
 ];
 
 if (!existsSync(app)) {

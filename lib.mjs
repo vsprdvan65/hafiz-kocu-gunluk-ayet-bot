@@ -77,8 +77,14 @@ function wrap(text, maxChars, maxLines){
 }
 
 export async function renderBanner(verse, outPath){
+  load();   // `_meal` dolu olsun — imza ondan türetiliyor (çağrı sırasına güvenme)
   const W=1080, H=540;
-  const ref = `${verse.surahName} ${verse.surahId}:${verse.ayahId} · Diyanet Meâli`;
+  // İMZA MEAL DOSYASINDAN GELİR, SABİT YAZILMAZ. 2026-09-02'de Elmalılı'ya
+  // geçilirken bu satır atlanmıştı: push metni "· Elmalılı Meâli" derken
+  // banner görseli hâlâ "Diyanet Meâli" basıyordu — yanlış atıf.
+  // `data/elmalili.json` kökünde `name` alanı var ("Elmalılı Hamdi Yazır").
+  const mealAdi = (_meal && _meal.name) ? _meal.name : 'Elmalılı Hamdi Yazır';
+  const ref = `${verse.surahName} ${verse.surahId}:${verse.ayahId} · ${mealAdi} Meâli`;
   const lines = wrap(verse.meal, 32, 3);              // Arapça yok — meal hero, 3 satıra kadar
   const startY = lines.length >= 3 ? 220 : (lines.length === 2 ? 245 : 270);
   const lineEls = lines.map((ln,i)=>`<text x="380" y="${startY + i*50}" fill="#F1E9FF" font-family="sans-serif" font-size="34" font-weight="600">${esc(ln)}</text>`).join('');

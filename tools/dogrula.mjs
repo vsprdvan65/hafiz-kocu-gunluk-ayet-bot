@@ -22,7 +22,10 @@ import { dirname, join, resolve } from 'path';
 import { getDailyVerse } from '../lib.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const app = resolve(process.argv[2] || join(ROOT, '../HAFIZ_KOCU_2_SÜRÜMLERİ/hafiz-kocu-2.0.2'));
+// VARSAYILAN YOL GÜNCEL SÜRÜME BAKAR. Eskiden 2.0.2'ye bakıyordu (üç sürüm
+// geride) — bu yüzden "içerik farklı" uyarısı anlamsızdı ve bot↔uygulama
+// özdeşlik kontrolü fiilen çalışmıyordu.
+const app = resolve(process.argv[2] || join(ROOT, '../HAFIZ_KOCU_3_SURUMLERI/hafiz-kocu-3.0.0'));
 
 let hata = 0;
 const ok  = (m) => console.log(`  ✓ ${m}`);
@@ -71,7 +74,7 @@ if (!existsSync(app)) {
   const ciftler = [
     ['data/kuran.json',            'public/kuran.json'],
     ['data/elmalili.json',         'public/data/meal/elmalili.json'],
-    ['data/turkishSurahNames.js',  'Ana_uygulama/Data/turkishSurahNames.js'],
+    ['data/turkishSurahNames.js',  'src/data/quran/turkishSurahNames.js'],
   ];
   for (const [b, a] of ciftler) {
     const bp = join(ROOT, b), ap = join(app, a);
